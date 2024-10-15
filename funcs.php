@@ -8,8 +8,8 @@ function debug($data)
 function registration() : bool
 {
     global $pdo;
-    $login = htmlspecialchars($_POST['login'], ENT_QUOTES, 'UTF-8');
-    $pass = htmlspecialchars($_POST['pass'], ENT_QUOTES, 'UTF-8');
+    $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_SPECIAL_CHARS);
+    $pass = filter_input(INPUT_POST, 'pass', FILTER_SANITIZE_SPECIAL_CHARS);
 
     if (empty($login) || empty($pass)) {
         $_SESSION['errors'] = 'Заполните все поля';
@@ -50,8 +50,8 @@ function registration() : bool
 function auth() : bool
 {
     global $pdo;
-    $login = htmlspecialchars($_POST['login'], ENT_QUOTES, 'UTF-8');
-    $pass = htmlspecialchars($_POST['pass'], ENT_QUOTES, 'UTF-8');
+    $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_SPECIAL_CHARS);
+    $pass = filter_input(INPUT_POST, 'pass', FILTER_SANITIZE_SPECIAL_CHARS);
 
     if (empty($login) || empty($pass)) {
         $_SESSION['errors'] = 'Заполните все поля';

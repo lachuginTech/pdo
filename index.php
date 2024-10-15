@@ -17,6 +17,14 @@ if (isset($_POST['auth'])) {
     die;
 }
 
+if (isset($_GET['do']) && $_GET['do'] === 'exit') {
+    if (!empty($_SESSION['user'])) {
+        unset($_SESSION['user']);
+    }
+    header("Location: index.php");
+    die;
+}
+
 ?>
 <!doctype html>
 <html lang="en">
