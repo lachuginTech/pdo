@@ -8,18 +8,41 @@ function debug($data)
 function registration() : bool
 {
     global $pdo;
-    $login = !empty($_POST['login']) ? trim($_POST['login']) : '';
-    $pass = !empty($_POST['pass']) ? trim($_POST['pass']) : '';
+    $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_STRING);
+    $pass = filter_input(INPUT_POST, 'pass', FILTER_SANITIZE_STRING);
 
-    if (empty($login) || empty($pass) ) {
-        $_SESSION['error'] = 'Заполните все поля';
+    if (empty($login) || empty($pass)) {
+        $_SESSION['errors'] = 'Заполните все поля';
         return false;
     }
 
-    $res = $pdo->prepare("SELECT COUNT(*) FROM `users` WHERE `login` = ?");
-    $res->execute([$login]);
-    if ($res->fetchColumn() > 0) {
-        $_SESSION['error'] = 'Пользователь с таким именем уже существует';
+    try {
+        $pdo->beginTransaction();
+
+        $res = $pdo->prepare("SELECT COUNT(*) FROM `users` WHERE `login` = ?");
+        $res->execute([$login]);
+        if ($res->fetchColumn() > 0) {
+            $_SESSION['errors'] = 'Пользователь с таким именем уже существует';
+            $pdo->rollBack();
+            return false;
+        }
+
+        $passHash = password_hash($pass, PASSWORD_DEFAULT);
+        $res = $pdo->prepare("INSERT INTO `users` (`login`, `pass`) VALUES (?, ?)");
+        if ($res->execute([$login, $passHash])) {
+            $pdo->commit();
+            $_SESSION['success'] = 'Регистрация прошла успешно';
+            return true;
+        } else {
+            $pdo->rollBack();
+            $_SESSION['errors'] = 'Произошла ошибка при регистрации';
+            return false;
+        }
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        error_log($e->getMessage());
+        $_SESSION['errors'] = 'Произошла ошибка при регистрации';
         return false;
     }
 }
+

@@ -6,7 +6,9 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/funcs.php';
 
 if (isset($_POST['register'])) {
-    debug($_POST);
+    registration();
+    header("Location: index.php");
+    die;
 }
 
 ?>
@@ -27,7 +29,7 @@ if (isset($_POST['register'])) {
 
     <div class="row my-3">
         <div class="col">
-            <?php if (isset($_SESSION['errors'])) : ?>
+            <?php if (!empty($_SESSION['errors'])) : ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <?php
                 echo $_SESSION['errors'];
