@@ -11,6 +11,12 @@ if (isset($_POST['register'])) {
     die;
 }
 
+if (isset($_POST['auth'])) {
+    auth();
+    header("Location: index.php");
+    die;
+}
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -39,7 +45,7 @@ if (isset($_POST['register'])) {
             </div>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['success'])) : ?>
+            <?php if (!empty($_SESSION['success'])) : ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php
                 echo $_SESSION['success'];
@@ -51,7 +57,7 @@ if (isset($_POST['register'])) {
         </div>
     </div>
 
-<?php if (!isset($_SESSION['user']['name'])) : ?>
+<?php if (empty($_SESSION['user']['name'])) : ?>
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h3>Регистрация</h3>
@@ -110,7 +116,7 @@ if (isset($_POST['register'])) {
 <?php else : ?>
     <div class="row">
         <div class="col-md-6 offset-md-3">
-            <p>Добро пожаловать, User! <a href="?do=exit">Log out</a></p>
+            <p>Добро пожаловать, <?= htmlspecialchars($_SESSION['user']['name']); ?> ! <a href="?do=exit">Log out</a></p>
         </div>
     </div>
     <form action="index.php" method="post" class="row g-3 mb-5">

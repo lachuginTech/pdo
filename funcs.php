@@ -8,8 +8,8 @@ function debug($data)
 function registration() : bool
 {
     global $pdo;
-    $login = filter_input(INPUT_POST, 'login', FILTER_SANITIZE_STRING);
-    $pass = filter_input(INPUT_POST, 'pass', FILTER_SANITIZE_STRING);
+    $login = htmlspecialchars($_POST['login'], ENT_QUOTES, 'UTF-8');
+    $pass = htmlspecialchars($_POST['pass'], ENT_QUOTES, 'UTF-8');
 
     if (empty($login) || empty($pass)) {
         $_SESSION['errors'] = 'Заполните все поля';
@@ -42,6 +42,44 @@ function registration() : bool
         $pdo->rollBack();
         error_log($e->getMessage());
         $_SESSION['errors'] = 'Произошла ошибка при регистрации';
+        return false;
+    }
+}
+
+
+function auth() : bool
+{
+    global $pdo;
+    $login = htmlspecialchars($_POST['login'], ENT_QUOTES, 'UTF-8');
+    $pass = htmlspecialchars($_POST['pass'], ENT_QUOTES, 'UTF-8');
+
+    if (empty($login) || empty($pass)) {
+        $_SESSION['errors'] = 'Заполните все поля';
+        return false;
+    }
+
+
+
+    try {
+        $res = $pdo->prepare("SELECT * FROM `users` WHERE `login` = ?");
+        $res->execute([$login]);
+        if (!$user = $res->fetch()) {
+            $_SESSION['errors'] = 'Пользователь не найден';
+            return false;
+        }
+
+
+        if (!password_verify($pass, $user['pass'])) {
+            $_SESSION['errors'] = 'Неверный пароль';
+            return false;
+        }
+        $_SESSION['success'] = "Вы вошли в аккаунт: $login";
+        $_SESSION['user']['name'] = $user['login'];
+        $_SESSION['user']['id'] = $user['id'];
+        return true;
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        $_SESSION['errors'] = 'Произошла ошибка при авторизации';
         return false;
     }
 }
