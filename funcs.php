@@ -84,3 +84,36 @@ function auth() : bool
     }
 }
 
+function save_message() : bool
+{
+    global $pdo;
+    $message = !empty($_POST['message']) ? $_POST['message'] : '';
+    if (!isset($_SESSION['user']['name'])) {
+        $_SESSION['errors'] = 'Вы не авторизованы';
+        return false;
+    }
+
+    if (empty($message)) {
+        $_SESSION['errors'] = 'Заполните поле';
+        return false;
+    }
+
+    $res = $pdo->prepare("INSERT INTO `messages` (`name`, `message`) VALUES (?, ?)");
+    $res->execute([$_SESSION['user']['name'], $message]);
+    if ($res->rowCount() > 0) {
+        $_SESSION['success'] = 'Сообщение успешно отправлено';
+        return true;
+    } else {
+        $_SESSION['errors'] = 'Произошла ошибка при отправке сообщения';
+        return false;
+    }
+}
+
+function get_messages() : array
+{
+    global $pdo;
+    $res = $pdo->query("SELECT * FROM `messages`");
+    return $res->fetchAll();
+}
+
+
